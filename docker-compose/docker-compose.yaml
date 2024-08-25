@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - LOG_LEVEL=DEBUG
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "55681:55681"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/otel-collector-config.yaml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  grafana_data:

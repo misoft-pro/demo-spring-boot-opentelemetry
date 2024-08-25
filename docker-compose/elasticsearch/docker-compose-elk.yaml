@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=true
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - ./elasticsearch/config/users:/usr/share/elasticsearch/config/initial_users
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 50
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}
+    container_name: logstash
+    environment:
+      - xpack.monitoring.enabled=true
+      - xpack.monitoring.elasticsearch.username=elastic
+      - xpack.monitoring.elasticsearch.password=changeme
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=my_kibana_password
+      - xpack.security.enabled=true
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  init-elastic-users:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    container_name: init-elastic-users
+    entrypoint: ["/bin/bash", "-c", "/usr/share/elasticsearch/config/initial_users/init-users.sh"]
+    environment:
+      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=true
+    volumes:
+      - ./elasticsearch/config/users:/usr/share/elasticsearch/config/initial_users
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  esdata:
+    driver: local

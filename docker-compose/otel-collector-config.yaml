@@ -1,0 +1,36 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  azuremonitor:
+    instrumentation_key: "84b27948-72cc-4337-8251-a641a4ed9cf0"
+  otlp/elastic:
+    endpoint: "https://6eac2226e0f44c6ea7846c06d30448d1.apm.us-central1.gcp.cloud.es.io:443"
+    headers:
+      # Elastic APM Server secret token
+      Authorization: "Bearer fgWJycrZ4ucwdfFRQE"
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp/elastic, debug ]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/elastic, debug]
+
+  telemetry:
+    logs:
+      level: "DEBUG"
