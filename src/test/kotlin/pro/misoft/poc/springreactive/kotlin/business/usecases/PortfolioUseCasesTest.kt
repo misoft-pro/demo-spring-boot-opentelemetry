@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.javamoney.moneta.Money
 import org.junit.jupiter.api.Test
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import pro.misoft.poc.springreactive.kotlin.business.model.market.PriceService
@@ -37,6 +38,8 @@ class PortfolioUseCasesTest {
         coEvery { finstarApiClient.getAllAccounts(userId) } coAnswers { listOf(fsAccount) }
         coEvery { finstarApiClient.getBalanceByAccount(fsAccount.id) } coAnswers { balance.toString() }
 
+        MDC.put("traceId", "7e0674227780f3226ae9a8b7d350a5ee")
+        MDC.put("spanId", "9485ce398027b648")
         val (items, totalMarketValue) = portfolioUseCases.getPortfolioOverview(userId, refCurrency)
 
         assertThat(items).hasSize(1)

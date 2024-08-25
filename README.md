@@ -1,4 +1,4 @@
-# Demo for Spring Boot Observability using OpenTelemetry standard
+# Demo for Spring Boot Observability using Micrometer and OpenTelemetry standard
 
 The main goal of this project is to implement Observability in Spring Boot application with a help of [Micrometer Facade](https://micrometer.io/). This project demonstrate how to create and manage telemetry data such as traces, metrics, and logs for Spring Boot WebFlux server using [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/) standard. 
 Technical scope:
